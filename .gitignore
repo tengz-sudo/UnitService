@@ -1,0 +1,7 @@
+# Do not track
+Data/
+
+# Files
+*.csv
+
+
