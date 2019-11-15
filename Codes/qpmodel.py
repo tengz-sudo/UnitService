@@ -60,7 +60,7 @@ def unconstrained_qp(services_to_consider, units_to_consider, service_count_dail
 
 
 
-def constrained_qp(services_to_consider, units_to_consider, service_count_daily_dicts,
+def constrained_qp(services_to_consider, units_to_consider, service_count_daily,
                     unit_cap_dict, cap_thresh = 0.9):
     # Input:
     # services_to_consider: list of services
@@ -71,29 +71,37 @@ def constrained_qp(services_to_consider, units_to_consider, service_count_daily_
 
     model = Model()
 
+    # create a dictionary for optimazation
+    service_count_daily_dicts = [{service:row[service] for service in services_to_consider }
+                             for index, row in service_count_daily.iterrows()]
+
     variables = model.addVars(services_to_consider, units_to_consider, vtype = GRB.BINARY)
 
     # constraint-0: services can not be moved
     model.addConstr(variables[('Green Team', 'PCU300')], GRB.EQUAL, 1)
     model.addConstr(variables[('Red Team', 'PCU300')], GRB.EQUAL, 1)
-    model.addConstr(variables[('Liver Transplant', 'PCU300')], GRB.EQUAL, 1)
-    model.addConstr(variables[('Kidney Transplant', 'PCU300')], GRB.EQUAL, 1)
-    model.addConstr(variables[('Transplant', 'PCU300')], GRB.EQUAL, 1)
+    # model.addConstr(variables[('Liver Transplant', 'PCU300')], GRB.EQUAL, 1)
+    # model.addConstr(variables[('Kidney Transplant', 'PCU300')], GRB.EQUAL, 1)
+    # model.addConstr(variables[('Transplant', 'PCU300')], GRB.EQUAL, 1)
 
     model.addConstr(variables[('Neurology', 'PCU400')], GRB.EQUAL, 1)
     model.addConstr(variables[('Neurosurgery', 'PCU400')], GRB.EQUAL, 1)
-    model.addConstr(variables[('Pulmonary', 'PCU400')], GRB.EQUAL, 1)
+    # model.addConstr(variables[('Pulmonary', 'PCU400')], GRB.EQUAL, 1)
+    model.addConstr(variables[('Yellow Team', 'PCU400')], GRB.EQUAL, 1)
 
-    model.addConstr(variables[('HemeOnc/SCT', 'PCU500')], GRB.EQUAL, 1)
-    model.addConstr(variables[('HemeOnc and StemCell', 'PCU500')], GRB.EQUAL, 1)
+
+    # model.addConstr(variables[('HemeOnc/SCT', 'PCU500')], GRB.EQUAL, 1)
+    # model.addConstr(variables[('HemeOnc and StemCell', 'PCU500')], GRB.EQUAL, 1)
+    model.addConstr(variables[('HemOnc and Stem Cell', 'PCU500')], GRB.EQUAL, 1)
 
     model.addConstr(variables[('Cardiology', 'PCU200')], GRB.EQUAL, 1)
-    model.addConstr(variables[('Cardiovascular Transplant', 'PCU200')], GRB.EQUAL, 1)
-    # no one else
+    # model.addConstr(variables[('Cardiovascular Transplant', 'PCU200')], GRB.EQUAL, 1)
 
+    model.addConstr(variables[('Otolaryngology (ENT)', 'PCU360')], GRB.EQUAL, 0)
+
+    # constraint: what services cannot be together
     # under 90%, 300/400, 200, 500
 
-    model.addConstr(variables[('ENT', 'PCU360')], GRB.EQUAL, 0)
 
 
     # constraints-1: for each service, only one should be 1
@@ -210,3 +218,6 @@ def constrained_piecewise(services_to_consider, units_to_consider, service_count
                 if sol[(service, unit)] == 1:
                     allocation.loc[service, unit] = 1
     return allocation
+
+
+# dd

@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def cal_cap_diff(allocation, service_count_daily, units_to_consider, services_to_consider):
     allocation_temp = allocation.copy()
@@ -40,7 +41,14 @@ def cal_daily_census(allocation, service_count_daily, units_to_consider, service
 
     return off_capacity_daily
 
-def cal_off_cap(df, unit, unit_cap_dict, thresh = 0.9):
+def cal_off_cap(df, unit, unit_cap_dict, thresh = 0.9, method = 'floor'):
     off_cap_days = len(df.loc[df[unit] >= unit_cap_dict[unit]])
-    off_thresh_days = len(df.loc[df[unit] >= int(unit_cap_dict[unit]*thresh)])
-    return [off_cap_days, off_thresh_days]
+    if method == 'floor':
+        off_thresh_days = len(df.loc[df[unit] >= np.floor(unit_cap_dict[unit]*thresh)])
+    elif method == 'round':
+        off_thresh_days = len(df.loc[df[unit] >= np.round(unit_cap_dict[unit]*thresh)])
+    elif method == 'ceil':
+        off_thresh_days = len(df.loc[df[unit] >= np.ceil(unit_cap_dict[unit]*thresh)])
+    return [off_thresh_days, off_cap_days]
+
+# dsd

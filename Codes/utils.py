@@ -52,7 +52,7 @@ SERVICE_MAP = {
 'Trauma': 'General Surgery',
 'Urology': 'Urology',
 # added later
-'Intensive Care':'Unknown'
+'Intensive Care':'Unknown' #1. if service.x is intensive care and service.y is not null, then service.x = service.y 2 use the last unit as their unit
 }
 
 DEPT_MAP = {
@@ -65,11 +65,12 @@ GROWTH_RATE = {
 'Red Team':1.4,
 'Neurosurgery':0.92,
 'Neurology':0.92,
-'Pulmonary':0.92,
+'Yellow Team':0.92,
+# 'Pulmonary':0.92,
 'General Pediatrics':1.06,
 'General Surgery':0.83,
-'Urology':3,
-'Plastic Surgery':0.5
+'Urology':3, # delete later
+'Plastic Surgery':0.5 # delete later
 }
 
 def convert_datatimes(df):
@@ -82,43 +83,43 @@ def convert_datatimes(df):
         df.loc[:, col] = pd.to_datetime(df[col])
     return df
 
-def convert_service_name(df):
+def convert_service_name(df, service_col = 'Service.x'):
     # convert the datetime columns into datatime in panda
     def converter(s):
         if s in SERVICE_MAP.keys():
             return SERVICE_MAP[s]
         else:
             return s
-    df['Service New'] = df['Service.x'].apply(converter)
-    df = df.rename(columns = {'Service.x':'Service Original', 'Service New':'Service.x'})
+    df['Service New'] = df[service_col].apply(converter)
+    df = df.rename(columns = {service_col:'Service Original', 'Service New':service_col})
     return df
 
-def convert_dept_name(df):
+def convert_dept_name(df, dept_col = 'Dept Abbrev'):
     # convert the datetime columns into datatime in panda
     def converter(d):
         if d in DEPT_MAP.keys():
             return DEPT_MAP[d]
         else:
             return d
-    df['Dept Abbrev'] = df['Dept Abbrev'].apply(converter)
+    df[dept_col] = df[dept_col].apply(converter)
     # df = df.rename(columns = {'Service.x':'Service Original', 'Service New':'Service.x'})
     return df
 
-def print_services_in_units(df):
+def print_services_in_units(df, service_col = 'Service.x', dept_col = 'Dept Abbrev'):
     # print top 10 services  in each unit
-    major_units = df['Dept Abbrev'].value_counts().index
+    major_units = df[dept_col].value_counts().index
     for dept in major_units:
-        temp = df.loc[df['Dept Abbrev'] == dept]
+        temp = df.loc[df[dept_col] == dept]
         print('Major Services in [', dept, '] :::::::')
-        print(temp['Service.x'].value_counts()[:10])
+        print(temp[service_col].value_counts()[:10])
         print('\n')
 
-def print_units_of_services(df, col = 'Service.x'):
-    services_set = df[col].value_counts().index
+def print_units_of_services(df, service_col = 'Service.x', dept_col = 'Dept Abbrev'):
+    services_set = df[service_col].value_counts().index
     for service in services_set:
-        temp = df.loc[df[col] == service]
+        temp = df.loc[df[service_col] == service]
         print('Major Units of Service [', service, '] :::::::')
-        print(temp['Dept Abbrev'].value_counts()[:10])
+        print(temp[dept_col].value_counts()[:10])
         print('\n')
 
 def service_daily_stats(df, services_set, percentiles = [0.25, 0.5, 0.75, 0.95, 0.97]):
@@ -127,13 +128,16 @@ def service_daily_stats(df, services_set, percentiles = [0.25, 0.5, 0.75, 0.95, 
         temp[service] = df[service].describe(percentiles = percentiles)
     return temp
 
-def daily_census_adjust(df):
-    def converter(c):
-        return np.round(c)
+def daily_census_adjust(df, converter = None):
+    # covnerter can be none
+    # def converter(c):
+    #     return np.round(c)
+    df_temp = df.copy()
     for service in GROWTH_RATE:
-        df[service] = df[service]*GROWTH_RATE[service]
-        df[service] = df[service].apply(converter)
-    return df
+        df_temp[service] = df_temp[service]*GROWTH_RATE[service]
+        if converter:
+            df_temp[service] = df_temp[service].apply(converter)
+    return df_temp
 
 
 def allocation_to_dict(allocation, units_to_consider, services_to_consider):
