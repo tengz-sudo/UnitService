@@ -79,13 +79,13 @@ def constrained_qp(services_to_consider, units_to_consider, service_count_daily,
 
     # constraint-0: services can not be moved
     model.addConstr(variables[('Green Team', 'PCU300')], GRB.EQUAL, 1)
-    # model.addConstr(variables[('Red Team', 'PCU300')], GRB.EQUAL, 1)
+    model.addConstr(variables[('Red Team', 'PCU300')], GRB.EQUAL, 1)
     # model.addConstr(variables[('Liver Transplant', 'PCU300')], GRB.EQUAL, 1)
     # model.addConstr(variables[('Kidney Transplant', 'PCU300')], GRB.EQUAL, 1)
     # model.addConstr(variables[('Transplant Surgery', 'PCU300')], GRB.EQUAL, 1)
     # Transplants in 500
     # model.addConstr(variables[('Green Team', 'PCU500')], GRB.EQUAL, 1)
-    model.addConstr(variables[('Red Team', 'PCU500')], GRB.EQUAL, 1)
+    # model.addConstr(variables[('Red Team', 'PCU500')], GRB.EQUAL, 1)
 
     model.addConstr(variables[('Neurology', 'PCU400')], GRB.EQUAL, 1)
     model.addConstr(variables[('Neurosurgery', 'PCU400')], GRB.EQUAL, 1)
