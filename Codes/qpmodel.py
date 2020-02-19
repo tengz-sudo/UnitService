@@ -99,7 +99,6 @@ def constrained_qp(services_to_consider, units_to_consider, service_count_daily,
 
     # model.addConstr(variables[('Cardiovascular Transplant', 'PCU200')], GRB.EQUAL, 1)
 
-
     model.addConstr(variables[('Otolaryngology (ENT)', 'PCU360')], GRB.EQUAL, 0)
     if "General Pediatrics 1" in services_to_consider:
         model.addConstr(variables[('General Pediatrics 1', 'PCU500')], GRB.EQUAL, 0)
